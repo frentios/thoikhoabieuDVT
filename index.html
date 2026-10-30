@@ -35,6 +35,8 @@
 }
 
 *{box-sizing:border-box}
+html.locked .finder,html.locked #seg,html.locked #adminBtn,html.locked footer{display:none!important}
+html.locked [data-goto-t],html.locked [data-goto-c]{cursor:default;text-decoration:none!important;pointer-events:none}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;min-height:100%;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px;overflow-x:hidden}
 button,input{font:inherit;color:inherit}
@@ -579,6 +581,9 @@ const BOOT = {
   parse: document.getElementById('parse-js').outerHTML,
   main: document.getElementById('main-js').outerHTML
 };
+const LOCK = window.TKB_LOCK || null;          // trang con chỉ cho một lớp
+const BASE = LOCK ? '../' : '';
+if (LOCK) document.documentElement.classList.add('locked');
 const STANDALONE = /github\.io$|^localhost$|^127\.|^$/.test(location.hostname);
 const GH = {owner:'frentios', repo:'thoikhoabieuDVT', branch:'main', path:'data.json'};
 const DEFAULT_TIMES = {
@@ -672,6 +677,7 @@ function readHash(){
   const h = decodeURIComponent(location.hash.slice(1));
   let m;
   st.admin = false;
+  if (LOCK) { st.tab = 'hs'; if (C[LOCK]) st.cls = LOCK; return; }
   if (h === 'quan-tri') { st.admin = true; return; }
   if ((m = h.match(/^lop-(.+)$/i))) { const k = Object.keys(C).find(n => n.toLowerCase() === m[1].toLowerCase()); if (k) { st.tab='hs'; st.cls=k; } }
   else if ((m = h.match(/^gv-(.+)$/))) { if (T.some(t=>t.id===m[1])) { st.tab='gv'; st.tid=m[1]; } }
@@ -679,6 +685,7 @@ function readHash(){
   else if (h === 'hoc-sinh') st.tab = 'hs';
 }
 function writeHash(){
+  if (LOCK) return;
   const h = st.admin ? 'quan-tri' : st.tab==='hs' ? 'lop-'+st.cls.toLowerCase() : 'gv-'+st.tid;
   if (location.hash.slice(1) !== h) { try { history.replaceState(null,'','#'+h); } catch(e){} }
 }
@@ -1032,6 +1039,7 @@ document.addEventListener('click', e => {
   if (b.parentElement === $seg && b.dataset.tab) { st.tab = b.dataset.tab; if (st.admin && !st.preview) { readTimeInputs(); st.admin = false; } render(); return; }
   if (b === $adminBtn) { st.admin = true; st.preview = false; render(); return; }
   if (b.dataset.day) { st.day = +b.dataset.day; render(); return; }
+  if (LOCK && (b.dataset.gotoT || b.dataset.gotoC)) return;
   if (b.dataset.gotoT) { const t = TBY[b.dataset.gotoT]; if (t) { st.tab='gv'; st.tid=t.id; if (!st.preview) st.admin = false; closeSearch(true); render(); scrollTop(); } return; }
   if (b.dataset.gotoC) { if (C[b.dataset.gotoC]) { st.tab='hs'; st.cls=b.dataset.gotoC; if (!st.preview) st.admin = false; closeSearch(true); render(); scrollTop(); } return; }
   const act = b.dataset.act; if (!act) return;
@@ -1082,7 +1090,7 @@ use(LIVE);
 readHash();
 render();
 // newest published data file wins over the copy embedded in the page
-fetch('data.json', {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
+fetch(BASE + 'data.json', {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
   if (j && Array.isArray(j.classes) && j.classes.length && (j.meta && j.meta.updated || '') > (LIVE.meta.updated || '')) {
     LIVE = fill(j); if (!draft) { readHash(); render(); }
   }
@@ -1096,7 +1104,7 @@ fetch('data.json', {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j
   } catch (e) { st.canEdit = false; }
   if (st.canEdit || st.admin) render();
 })();
-if (STANDALONE) { st.canEdit = true; render(); }
+if (STANDALONE && !LOCK) { st.canEdit = true; render(); }
 })();
 </script>
 
