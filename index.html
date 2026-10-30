@@ -846,8 +846,7 @@ function renderHS(){
     Object.entries(subj).sort((a,b)=>b[1].n-a[1].n).map(([s,o]) => `<div class="srow" style="--h:${hue(s)}"><i class="dot"></i><div class="nm"><b>${esc(s)}</b>${
       [...o.t].map(t => `<button data-goto-t="${esc(t)}">${esc(t)}</button>`).join(', ') || '<span style="color:var(--ink-3)">Chưa phân công</span>'}</div><span class="n">${o.n} tiết</span></div>`).join('')}</div></div>` : '';
   $board.innerHTML = previewBanner() + `<div class="bhead"><div><h2>Lớp ${esc(c.name)}</h2><div class="meta">
-      ${c.homeroom ? `<button class="tag" data-goto-t="${esc(c.homeroom)}">Chủ nhiệm <strong>${esc(c.homeroom)}</strong></button>` : ''}
-      <span class="tag"><strong>${n}</strong> tiết mỗi tuần</span></div></div>
+      ${c.homeroom ? `<button class="tag" data-goto-t="${esc(c.homeroom)}">Chủ nhiệm <strong>${esc(c.homeroom)}</strong></button>` : ''}</div></div>
     <label class="switch" for="showT"><input type="checkbox" id="showT" ${st.showT?'checked':''}><span class="track"></span>Hiện tên giáo viên</label></div>
     <div class="gridwrap">${weekGrid('hs', c.grid)}${dayView('hs', c.grid)}</div>${sum}`;
 }
